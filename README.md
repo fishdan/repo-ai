@@ -40,6 +40,39 @@ If something is project-specific, it does **not** belong here.
 
 ---
 
+## How to Use
+
+You work with your agent conversationally, while the repository provides shared context and guardrails.
+
+A typical workflow looks like this:
+
+**You:**
+> Hey buddy — read the instructions in `.repo_ai` and remember them.
+
+*(The agent loads and follows the shared `repo.ai` instructions.)*
+
+*A few minutes later…*
+
+**You:**
+> Hey buddy, make a new branch called `foobar` and let’s start working there.
+
+*(The agent creates the branch and begins work.)*
+
+*A few hours later…*
+
+**You:**
+> Hey buddy — let’s commit everything, push it to our branch, and open a PR.
+
+*(The agent commits as the bot, pushes using GitHub App authentication, and prepares a pull request.)*
+
+That’s it.
+
+The key idea is that **`.repo_ai` establishes shared rules and behavior**, so you don’t need to repeat setup, authentication, or workflow instructions in every conversation or repository.
+
+Once the agent has read `.repo_ai`, you can just work.
+
+---
+
 ## Repository Structure
 
 ```
