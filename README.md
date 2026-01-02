@@ -46,7 +46,7 @@ If something is project-specific, it does **not** belong here.
 
 repo-ai/
 ├── repo.ai                 # Canonical entrypoint for tooling
-├── repo_scripts/           # Shared executable scripts
+├── scripts/           # Shared executable scripts
 │   ├── github-app-setup-git-auth.sh
 │   ├── github-app-generate-jwt.py
 │   └── github-app-get-installation-token.py
