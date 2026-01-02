@@ -100,7 +100,7 @@ All paths are **self-contained** and assume this repo lives at `.repo_ai/` when 
 `repo-ai` is intended to be added to other repositories as a **git submodule**:
 
 ```bash
-git submodule add https://github.com/<OWNER>/repo-ai.git .repo_ai
+git submodule add https://github.com/fishdan/repo-ai.git .repo_ai
 ````
 
 After cloning a repo that uses it:
