@@ -1,0 +1,8 @@
+# Private keys (never commit)
+*.pem
+*.key
+*.private*
+*.secret*
+
+# Repo-ai specific secrets
+secrets/config.txt

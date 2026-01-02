@@ -1,0 +1,124 @@
+BOOTSTRAP TASK — GITHUB APP AUTHENTICATION
+
+You are bootstrapping authentication for a GitHub App.
+
+Context:
+- You have read access to a GitHub App private key (.pem file) in the secrets folder.
+- You have the GitHub App ID and the GitHub Installation ID in config.txt in the secrets folder.
+- You must authenticate ONLY as the GitHub App.
+- All git commits must be authored as the GitHub App bot, not as a human user.
+
+You are NOT allowed to use:
+- Personal access tokens
+- OAuth tokens
+- Human credentials
+- Previously cached tokens
+
+**QUICK START**: Use the provided scripts for faster setup:
+- `scripts/github-app-setup-git-auth.sh` - Complete setup (recommended)
+- `scripts/github-app-generate-jwt.py` - Generate JWT only
+- `scripts/github-app-get-installation-token.py` - Get installation token
+
+Your task is to:
+1. Generate and validate a GitHub App installation access token
+2. Configure git to commit as the GitHub App bot
+3. Set up authentication for git push operations
+
+Steps (must be followed exactly):
+
+PART 1: Generate and Validate Installation Token
+
+**Option A (Recommended)**: Use the setup script:
+   - Run: `./scripts/github-app-setup-git-auth.sh`
+   - This handles all steps automatically
+
+**Option B (Manual)**: Follow these steps:
+
+1. Generate a JWT for the GitHub App:
+   - Use RS256.
+   - Header: { "alg": "RS256", "typ": "JWT" }
+   - Payload:
+     - iss = GitHub App ID (from secrets/config.txt)
+     - iat = current Unix time minus 60 seconds
+     - exp = current Unix time plus no more than 10 minutes
+   - Sign using the App private key (secrets/ai-codex-dan.2025-12-12.private-key.pem)
+   - **OR use**: `python3 scripts/github-app-generate-jwt.py`
+
+2. Exchange the JWT for an installation access token:
+   - POST to:
+     https://api.github.com/app/installations/{INSTALLATION_ID}/access_tokens
+   - Headers:
+     - Authorization: Bearer <JWT>
+     - Accept: application/vnd.github+json
+   - **OR use**: `python3 scripts/github-app-get-installation-token.py` (outputs JSON with token and expires_at)
+
+3. Validate the installation token by making BOTH of the following calls:
+   a) GET https://api.github.com/app
+      - Use JWT for authentication (not installation token)
+      - Confirms identity as the GitHub App
+      - Extract app slug and ID for bot identity
+   b) GET https://api.github.com/installation/repositories
+      - Use installation token for authentication
+      - Confirms repository access scope
+
+4. Verify:
+   - The app slug is correct (e.g., "ai-codex-dan")
+   - Only the expected repositories are visible
+   - No admin or unexpected permissions are present
+
+PART 2: Configure Git for Bot Commits
+
+5. Configure git user identity for bot commits:
+   - Set git config user.name = "{app-slug}[bot]"
+   - Set git config user.email = "{app-id}+{app-slug}[bot]@users.noreply.github.com"
+   - Example: "ai-codex-dan[bot]" and "2461425+ai-codex-dan[bot]@users.noreply.github.com"
+
+6. Set up git remote for HTTPS authentication:
+   - Set remote URL to: https://github.com/{owner}/{repo}.git
+   - Do NOT embed token in URL (security risk)
+
+7. Create GIT_ASKPASS script for token authentication:
+   - Create script at /tmp/git-askpass.sh
+   - Script should echo the installation token when called
+   - Make script executable (chmod 755)
+   - Script content: #!/bin/bash\necho "{installation_token}"
+
+8. For git push operations, use:
+   - GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>
+   - This provides the token automatically without prompting
+
+PART 3: Token Management
+
+9. Token expiration handling:
+   - Installation tokens expire in ~1 hour
+   - Before each git push, check if token is still valid
+   - If expired or about to expire, regenerate token and update /tmp/git-askpass.sh
+   - Always use fresh tokens (never reuse expired tokens)
+
+10. If validation succeeds:
+    - Store the installation token in /tmp/git-askpass.sh only
+    - Note its expiration time
+    - Verify git config shows bot identity
+    - Report: "GitHub App authentication successful - commits will be authored as {app-slug}[bot]"
+
+Failure rules (mandatory):
+- If any step fails, STOP immediately.
+- Do NOT retry with alternate credentials.
+- Do NOT attempt to escalate permissions.
+- Do NOT commit as a human user if bot configuration fails.
+- Report the exact failure and request human intervention.
+
+Security invariants:
+- The private key must never be logged, echoed, summarized, or stored.
+- The JWT must never be reused beyond its expiration window.
+- Installation tokens must never be logged or committed to git.
+- The GIT_ASKPASS script must be in /tmp (temporary, not in repo).
+- All git commits MUST use the bot identity (never human credentials).
+
+This bootstrap task must be completed successfully before any repository operations are attempted.
+
+VERIFICATION:
+After setup, verify with:
+- git config user.name (should show "[bot]")
+- git config user.email (should show "@users.noreply.github.com")
+- git log --format="%an <%ae>" (latest commits should show bot identity)
