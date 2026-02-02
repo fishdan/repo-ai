@@ -14,10 +14,10 @@ You are NOT allowed to use:
 - Human credentials
 - Previously cached tokens
 
-**QUICK START**: Use the provided scripts for faster setup:
-- `scripts/github-app-setup-git-auth.sh` - Complete setup (recommended)
-- `scripts/github-app-generate-jwt.py` - Generate JWT only
-- `scripts/github-app-get-installation-token.py` - Get installation token
+**QUICK START**: Use the provided scripts in the scripts folder for faster setup:  all paths are relative to the directory containing this file, repo.ai
+- `github-app-setup-git-auth.sh` - Complete setup (recommended)
+- `github-app-generate-jwt.py` - Generate JWT only
+- `github-app-get-installation-token.py` - Get installation token
 
 Your task is to:
 1. Generate and validate a GitHub App installation access token
@@ -29,7 +29,7 @@ Steps (must be followed exactly):
 PART 1: Generate and Validate Installation Token
 
 **Option A (Recommended)**: Use the setup script:
-   - Run: `./scripts/github-app-setup-git-auth.sh`
+   - Run: `github-app-setup-git-auth.sh` from the scripts folder
    - This handles all steps automatically
 
 **Option B (Manual)**: Follow these steps:
