@@ -3,8 +3,8 @@ BOOTSTRAP TASK — GITHUB APP AUTHENTICATION
 You are bootstrapping authentication for a GitHub App.
 
 Context:
-- You have read access to a GitHub App private key (.pem file) in the secrets folder.
-- You have the GitHub App ID and the GitHub Installation ID in config.txt in the secrets folder.
+- You have read access to a GitHub App private key (.pem file) in the `secrets/` folder next to this file (i.e., `.repo_ai/secrets/` in a parent repo that vendors this as a submodule).
+- You have the GitHub App ID and the GitHub Installation ID in `secrets/config.txt` (i.e., `.repo_ai/secrets/config.txt`).
 - You must authenticate ONLY as the GitHub App.
 - All git commits must be authored as the GitHub App bot, not as a human user.
 
@@ -18,6 +18,14 @@ You are NOT allowed to use:
 - `github-app-setup-git-auth.sh` - Complete setup (recommended)
 - `github-app-generate-jwt.py` - Generate JWT only
 - `github-app-get-installation-token.py` - Get installation token
+
+PATH RULES (NO AMBIGUITY)
+- All relative paths in this document are relative to the directory containing this file (the `.repo_ai/` directory).
+  - `scripts/...` means `.repo_ai/scripts/...`
+  - `secrets/...` means `.repo_ai/secrets/...`
+- If you are running commands from your parent repo root, prefix paths with `.repo_ai/`.
+  - Example (from parent repo root): `.repo_ai/scripts/github-app-setup-git-auth.sh`
+  - Example (after `cd .repo_ai`): `./scripts/github-app-setup-git-auth.sh`
 
 Your task is to:
 1. Generate and validate a GitHub App installation access token
@@ -41,7 +49,7 @@ PART 1: Generate and Validate Installation Token
      - iss = GitHub App ID (from secrets/config.txt)
      - iat = current Unix time minus 60 seconds
      - exp = current Unix time plus no more than 10 minutes
-   - Sign using the App private key (secrets/ai-codex-dan.2025-12-12.private-key.pem)
+   - Sign using the App private key (for this repo: `secrets/ai-codex-dan.2025-12-12.private-key.pem`)
    - **OR use**: `python3 scripts/github-app-generate-jwt.py`
 
 2. Exchange the JWT for an installation access token:
