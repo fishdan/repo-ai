@@ -1,0 +1,28 @@
+# Dispatches bump_repo_ai to all consumer repos when repo-ai main changes.
+# Requires: Add REPO_AI_BUMP_TOKEN secret (PAT or App token with repo scope
+# on all consumer repos to trigger repository_dispatch).
+name: Bump .repo_ai in consumer repos
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger consumer repo workflows
+        env:
+          GH_TOKEN: ${{ secrets.REPO_AI_BUMP_TOKEN }}
+        run: |
+          repos=(
+            "fishdan/MakeALetter"
+            # Add other consumers as needed:
+            # "fishdan/consumer-repo-2"
+            # "fishdan/consumer-repo-3"
+          )
+
+          for r in "${repos[@]}"; do
+            echo "Dispatching bump_repo_ai to $r"
+            gh api repos/$r/dispatches -f event_type='bump_repo_ai' || echo "Warning: failed to dispatch to $r"
+          done
