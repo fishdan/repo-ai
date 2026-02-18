@@ -42,7 +42,10 @@ git config user.email "${APP_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
 echo "Creating GIT_ASKPASS script..."
 cat > /tmp/git-askpass.sh <<EOF
 #!/bin/bash
-echo "$INSTALL_TOKEN"
+case "\$1" in
+  *Username*) echo "x-access-token" ;;
+  *) echo "$INSTALL_TOKEN" ;;
+esac
 EOF
 chmod 755 /tmp/git-askpass.sh
 
@@ -55,4 +58,3 @@ echo "   Token expires at: $EXPIRES_AT"
 echo ""
 echo "To push, use:"
 echo "  GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>"
-
