@@ -12,20 +12,26 @@
 # After running this, git push operations should use:
 #     GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Get installation token
-echo "Generating installation token..."
+echo "Validating GitHub App identity..."
+JWT=$(python3 "$SCRIPT_DIR/github-app-generate-jwt.py")
+APP_JSON=$(curl -sS -H "Authorization: Bearer $JWT" -H "Accept: application/vnd.github+json" https://api.github.com/app)
+APP_SLUG=$(echo "$APP_JSON" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data.get('slug',''))")
+APP_ID=$(echo "$APP_JSON" | python3 -c "import sys,json; data=json.load(sys.stdin); print(data.get('id',''))")
+if [ -z "$APP_SLUG" ] || [ -z "$APP_ID" ]; then
+  echo "Failed to validate GitHub App identity from /app response."
+  exit 1
+fi
+
+echo "Generating installation token for required repositories..."
 TOKEN_DATA=$(python3 "$SCRIPT_DIR/github-app-get-installation-token.py")
 INSTALL_TOKEN=$(echo "$TOKEN_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
 EXPIRES_AT=$(echo "$TOKEN_DATA" | python3 -c "import sys, json; print(json.load(sys.stdin)['expires_at'])")
-
-# Read config for app details
-APP_ID=$(grep GITHUB_APP_ID "$PROJECT_ROOT/secrets/config.txt" | cut -d'=' -f2)
-APP_SLUG="ai-codex-dan"  # From validation, could be read from API if needed
+REQUIRED_REPOS=$(echo "$TOKEN_DATA" | python3 -c "import sys, json; print(', '.join(json.load(sys.stdin).get('required_repositories', [])))")
 
 # Configure git user identity
 echo "Configuring git user identity..."
@@ -36,7 +42,10 @@ git config user.email "${APP_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
 echo "Creating GIT_ASKPASS script..."
 cat > /tmp/git-askpass.sh <<EOF
 #!/bin/bash
-echo "$INSTALL_TOKEN"
+case "\$1" in
+  *Username*) echo "x-access-token" ;;
+  *) echo "$INSTALL_TOKEN" ;;
+esac
 EOF
 chmod 755 /tmp/git-askpass.sh
 
@@ -44,9 +53,8 @@ echo ""
 echo "✅ GitHub App authentication configured successfully"
 echo "   Git user: $(git config user.name)"
 echo "   Git email: $(git config user.email)"
+echo "   Required repos validated: $REQUIRED_REPOS"
 echo "   Token expires at: $EXPIRES_AT"
 echo ""
 echo "To push, use:"
 echo "  GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>"
-
-

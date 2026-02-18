@@ -126,6 +126,11 @@ All changes must be made in this repo and then pulled via submodule updates.
 
 See `secrets/README.md` for setup details.
 
+The setup/token scripts automatically scope and validate installation-token access for:
+- the `repo-ai` repository
+- `fishdan-terraform` (same owner as the parent repo)
+- the parent repo that vendors `.repo_ai`
+
 ---
 
 ## Security Guarantees
