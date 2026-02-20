@@ -17,9 +17,8 @@ jobs:
         run: |
           repos=(
             "fishdan/MakeALetter"
-            # Add other consumers as needed:
-            # "fishdan/consumer-repo-2"
-            # "fishdan/consumer-repo-3"
+            "fishdan/iby"
+            "fishdan/fishdan-terraform"
           )
 
           for r in "${repos[@]}"; do

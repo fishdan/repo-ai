@@ -79,7 +79,9 @@ Once the agent has read `.repo_ai`, you can just work.
 
 repo-ai/
 ├── repo.ai                 # Canonical entrypoint for tooling
-├── scripts/           # Shared executable scripts
+├── .github/workflows/
+│   └── bump-consumers.yml  # Dispatches submodule bumps to consumer repos on push to main
+├── scripts/                # Shared executable scripts
 │   ├── github-app-setup-git-auth.sh
 │   ├── github-app-generate-jwt.py
 │   └── github-app-get-installation-token.py
@@ -155,6 +157,16 @@ If authentication fails, the correct action is to **stop**, not to fall back.
 * Breaking changes should be rare and documented
 
 This repo favors **stability over novelty**.
+
+### Automatic Bump to Consumers
+
+When you push to `main`, the **bump-consumers** workflow automatically dispatches a `bump_repo_ai` event to all consumer repos. Each consumer runs its own workflow that updates the `.repo_ai` submodule to the latest commit and pushes the change. This keeps consumers in sync without manual `git submodule update --remote` in each repo.
+
+**Setup (one-time):**
+
+1. **In repo-ai:** Add `REPO_AI_BUMP_TOKEN` secret (PAT with `repo` scope on all consumer repos). See [GitHub Settings → Secrets](https://github.com/fishdan/repo-ai/settings/secrets/actions).
+2. **In each consumer:** Add the `bump-repo-ai` workflow (listens for `repository_dispatch` with `event_type: bump_repo_ai`). If repo-ai is private, add `REPO_AI_ACCESS_TOKEN` for submodule fetch.
+3. **In repo-ai:** Add new consumers to the `repos` array in `.github/workflows/bump-consumers.yml`.
 
 ---
 
