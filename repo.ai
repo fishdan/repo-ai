@@ -109,6 +109,12 @@ PART 3: Token Management
     - Verify git config shows bot identity
     - Report: "GitHub App authentication successful - commits will be authored as {app-slug}[bot]"
 
+TROUBLESHOOTING NOTE (installation repos empty):
+- Symptom: `GET /installation/repositories` returns an empty list even though the app is installed.
+- Most likely cause: stale/expired installation token in `/tmp/git-askpass.sh` (or a token generated earlier in the session).
+- Fix: rerun `scripts/github-app-setup-git-auth.sh` to refresh the installation token, then re-validate.
+- If still empty: confirm `GITHUB_INSTALLATION_ID` in `secrets/config.txt` matches the installation shown in GitHub, then call `GET /app/installations/{INSTALLATION_ID}` with a fresh JWT to verify the account and repository selection.
+
 Failure rules (mandatory):
 - If any step fails, STOP immediately.
 - Do NOT retry with alternate credentials.
