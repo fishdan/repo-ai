@@ -69,6 +69,14 @@ PART 1: Generate and Validate Installation Token
       - Use installation token for authentication
       - Confirms repository access scope
 
+API NOTE (GitHub REST):
+- When using an installation token for REST API calls (e.g., creating PRs), include:
+  - `Authorization: Bearer <installation_token>`
+  - `Accept: application/vnd.github+json`
+  - `User-Agent: ai-codex-dan` (or another explicit UA)
+  - `X-GitHub-Api-Version: 2022-11-28`
+- If you use `/tmp/git-askpass.sh` to source the token, extract the token string (the echoed value), not the whole script.
+
 4. Verify:
    - The app slug is correct (e.g., "ai-codex-dan")
    - Only the expected repositories are visible
