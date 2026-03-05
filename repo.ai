@@ -5,6 +5,7 @@ You are bootstrapping authentication for a GitHub App.
 Context:
 - You have read access to a GitHub App private key (.pem file) in the `secrets/` folder next to this file (i.e., `.repo_ai/secrets/` in a parent repo that vendors this as a submodule).
 - You have the GitHub App ID and the GitHub Installation ID in `secrets/config.txt` (i.e., `.repo_ai/secrets/config.txt`).
+- If you don't have a key and App ID that work, help the user get them and put them in the right place and then reload.
 - You must authenticate ONLY as the GitHub App.
 - All git commits must be authored as the GitHub App bot, not as a human user.
 
