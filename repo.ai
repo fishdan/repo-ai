@@ -82,37 +82,36 @@ PART 2: Configure Git for Bot Commits
    - Set git config user.email = "{app-id}+{app-slug}[bot]@users.noreply.github.com"
    - Example: "ai-codex-dan[bot]" and "2461425+ai-codex-dan[bot]@users.noreply.github.com"
 
-6. Set up git remote for HTTPS authentication:
-   - Set remote URL to: https://github.com/{owner}/{repo}.git
-   - Do NOT embed token in URL (security risk)
+6. Set up **git remote transport** (choose one — both are valid):
 
-7. Create GIT_ASKPASS script for token authentication:
-   - Create script at /tmp/git-askpass.sh
-   - Script should echo the installation token when called
-   - Make script executable (chmod 755)
-   - Script content: #!/bin/bash\necho "{installation_token}"
+   **Option A — SSH (typical for developers who avoid HTTPS remotes):**
+   - Set `remote.origin.url` to: `git@github.com:{owner}/{repo}.git`
+   - Push/pull using normal SSH (ssh-agent or `GIT_SSH_COMMAND='ssh -i ~/.ssh/your_key -o IdentitiesOnly=yes'`, etc.).
+   - **Important:** GitHub App **installation tokens do not authenticate SSH**. SSH uses a **separate** credential (user SSH key or deploy key with repo access). That is fine: the **bot identity on commits** still comes from step 5, which this setup configures. You are not using a human PAT for Git.
 
-8. For git push operations, use:
-   - GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>
-   - This provides the token automatically without prompting
+   **Option B — HTTPS + installation token (no SSH key for Git):**
+   - Set remote URL to: `https://github.com/{owner}/{repo}.git`
+   - Do NOT embed the token in the URL (security risk)
+   - Create GIT_ASKPASS script for token authentication:
+     - Create script at /tmp/git-askpass.sh
+     - Script should echo the installation token when called (see `scripts/github-app-setup-git-auth.sh`)
+     - Make script executable (chmod 755)
+   - For `git push`: `GIT_ASKPASS=/tmp/git-askpass.sh GIT_TERMINAL_PROMPT=0 git push origin <branch>`
 
 PART 3: Token Management
 
-9. Token expiration handling:
-   - Installation tokens expire in ~1 hour
-   - Before each git push, check if token is still valid
-   - If expired or about to expire, regenerate token and update /tmp/git-askpass.sh
-   - Always use fresh tokens (never reuse expired tokens)
+7. Installation token expiration (~1 hour):
+   - **HTTPS Git (Option B):** Before each `git push`, ensure the token in `/tmp/git-askpass.sh` is still valid; if not, rerun `scripts/github-app-setup-git-auth.sh`.
+   - **SSH Git (Option A):** Push does not use the installation token. You still need a **fresh installation token** for **GitHub REST API** calls (e.g. `gh pr create` with `GH_TOKEN`, or custom API scripts). Regenerate via `github-app-get-installation-token.py` or rerun the setup script when API calls fail with 401.
 
-10. If validation succeeds:
-    - Store the installation token in /tmp/git-askpass.sh only
-    - Note its expiration time
-    - Verify git config shows bot identity
-    - Report: "GitHub App authentication successful - commits will be authored as {app-slug}[bot]"
+8. If validation succeeds:
+   - For Option B: store the installation token in `/tmp/git-askpass.sh` only; note expiration.
+   - Verify git config shows bot identity (step 5).
+   - Report: "GitHub App authentication successful - commits will be authored as {app-slug}[bot]"
 
 TROUBLESHOOTING NOTE (installation repos empty):
 - Symptom: `GET /installation/repositories` returns an empty list even though the app is installed.
-- Most likely cause: stale/expired installation token in `/tmp/git-askpass.sh` (or a token generated earlier in the session).
+- Most likely cause: stale/expired installation token (in `/tmp/git-askpass.sh` if you use HTTPS Git, or in memory for API-only use if you use SSH for Git).
 - Fix: rerun `scripts/github-app-setup-git-auth.sh` to refresh the installation token, then re-validate.
 - If still empty: confirm `GITHUB_INSTALLATION_ID` in `secrets/config.txt` matches the installation shown in GitHub, then call `GET /app/installations/{INSTALLATION_ID}` with a fresh JWT to verify the account and repository selection.
 

@@ -119,10 +119,13 @@ All changes must be made in this repo and then pulled via submodule updates.
 
 ## Authentication Model (High Level)
 
-* A **GitHub App** is the sole identity
+* A **GitHub App** is the sole **commit identity** (and the source of **installation tokens** for GitHub’s API)
 * A private key is used locally to generate a short-lived JWT
 * The JWT is exchanged for a **1-hour installation token**
-* Git uses the installation token via `GIT_ASKPASS`
+* **Git transport — pick one:**
+  * **SSH** (`git@github.com:...`): uses your normal SSH key (or deploy key) for the wire. Installation tokens **do not** authenticate SSH. The setup script still sets `user.name` / `user.email` so commits are authored as `{app-slug}[bot]`.
+  * **HTTPS**: use the installation token via `GIT_ASKPASS` (see `scripts/github-app-setup-git-auth.sh`) — no token embedded in the remote URL.
+* For **REST API** / **`gh`** with a token, use a fresh **installation token** (e.g. `GH_TOKEN`) — independent of whether Git uses SSH or HTTPS.
 * Commits are authored as `{app-slug}[bot]`
 * Tokens are never committed or logged
 

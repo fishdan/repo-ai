@@ -1,3 +1,22 @@
+# -----------------------------------------------------------------------------
+# Bump chain (this does NOT rotate GitHub App installation tokens)
+#
+# 1. You merge changes into repo-ai `main` (often via PR).
+# 2. This workflow runs on push to `main` and sends repository_dispatch
+#    `bump_repo_ai` to each repo listed below.
+# 3. Each consumer repo must define a workflow on `repository_dispatch` that runs
+#    e.g. `git submodule update --remote .repo_ai`, commits if the submodule
+#    pointer changed, and pushes — updating the pinned .repo_ai commit SHA.
+#
+# Requirements:
+# - Secret REPO_AI_BUMP_TOKEN on *this* (repo-ai) repo: credential that can
+#   call POST /repos/{owner}/{repo}/dispatches on every listed consumer.
+# - Consumers need their own bump workflow + (if repo-ai is private) a token
+#   so checkout can fetch the submodule.
+#
+# To add a new consumer: append "owner/repo" to the repos array below.
+# -----------------------------------------------------------------------------
+# Legacy one-line summary:
 # Dispatches bump_repo_ai to all consumer repos when repo-ai main changes.
 # Requires: Add REPO_AI_BUMP_TOKEN secret (PAT or App token with repo scope
 # on all consumer repos to trigger repository_dispatch).
