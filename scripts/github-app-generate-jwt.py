@@ -63,10 +63,11 @@ def generate_jwt():
     
     # Generate JWT payload
     now = int(time.time())
+    # GitHub requires (exp - iat) <= 600 seconds, not 660 (iat skew + 10m window).
     payload = {
         'iss': app_id,
         'iat': now - 60,  # Issued 60 seconds ago (clock skew tolerance)
-        'exp': now + 600  # Expires in 10 minutes
+        'exp': now + 540  # Max 600s after iat
     }
     
     # Sign and encode the JWT
