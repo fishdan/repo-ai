@@ -8,6 +8,8 @@ Context:
 - If you don't have a key and App ID that work, help the user get them and put them in the right place and then reload.
 - You must authenticate ONLY as the GitHub App.
 - All git commits must be authored as the GitHub App bot, not as a human user.
+- Do NOT use any external GitHub connector/plugin/tool integration for repository actions when this local GitHub App workflow is available.
+- Prefer the local `.repo_ai` scripts plus `git`, `curl`, or `gh` with a freshly generated installation token so all operations follow the same explicit auth path.
 
 You are NOT allowed to use:
 - Personal access tokens
