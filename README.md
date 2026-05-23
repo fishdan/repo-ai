@@ -71,6 +71,8 @@ The key idea is that **`.repo_ai` establishes shared rules and behavior**, so yo
 
 Once the agent has read `.repo_ai`, you can just work.
 
+**New teammate?** Read **[`docs/onboarding.md`](docs/onboarding.md)** — one shared GitHub App for the whole team; do not register a personal App per developer.
+
 ---
 
 ## Repository Structure
@@ -79,6 +81,8 @@ Once the agent has read `.repo_ai`, you can just work.
 
 repo-ai/
 ├── repo.ai                 # Canonical entrypoint for tooling
+├── docs/
+│   └── onboarding.md       # Team onboarding (one App, secrets handoff)
 ├── .github/workflows/
 │   └── bump-consumers.yml  # Dispatches submodule bumps to consumer repos on push to main
 ├── scripts/                # Shared executable scripts
