@@ -1,6 +1,8 @@
 ```md
 # Secrets Directory — GitHub App (Bot) Authentication
 
+**Joining the team?** See **[`docs/onboarding.md`](../docs/onboarding.md)** first — there is **one** team App; admins hand off these files; do not create a separate App per developer.
+
 This directory contains **local-only secrets** required to authenticate as a **GitHub App bot**.
 
 ⚠️ **Nothing in this directory should ever be committed**, except this README and safe example files.
